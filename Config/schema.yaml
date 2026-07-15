@@ -1,0 +1,15 @@
+columns:
+
+  customer_id:
+    type: integer
+    required: true
+    unique: true
+
+  sales:
+    type: float
+    required: true
+    min_value: 0
+
+  order_date:
+    type: date
+    required: true
