@@ -11,8 +11,7 @@ Wrap your pipeline call with this (see example at the bottom) to log
 every run automatically.
 
 Output: a JSON log entry per run, appended to pipeline_logs.jsonl,
-plus printed to console. A teammate can later add a `pipeline_runs`
-table in Supabase and insert these same fields as DB columns.
+plus printed to console, plus saved into a `pipeline_logs` table in Supabase.
 """
 
 import os
@@ -82,6 +81,54 @@ def diagnose_change(before: dict, after: dict) -> str:
         return "mixed_change"
 
 
+def ensure_pipeline_logs_table():
+    """Creates pipeline_logs table if it doesn't exist yet -- safe to call every time."""
+
+    create_sql = text("""
+        CREATE TABLE IF NOT EXISTS pipeline_logs (
+            id                  SERIAL PRIMARY KEY,
+            run_label           TEXT NOT NULL,
+            run_timestamp       TIMESTAMPTZ NOT NULL DEFAULT now(),
+            duration_seconds    NUMERIC(10,2),
+            status              TEXT,
+            error_message       TEXT,
+            rows_before         INTEGER,
+            rows_after          INTEGER,
+            row_delta           INTEGER,
+            change_type         TEXT
+        );
+    """)
+    with engine.begin() as connection:
+        connection.execute(create_sql)
+
+
+def save_log_to_supabase(log_entry: dict):
+    """Inserts one log entry into the pipeline_logs table."""
+
+    insert_sql = text("""
+        INSERT INTO pipeline_logs
+            (run_label, duration_seconds, status, error_message,
+             rows_before, rows_after, row_delta, change_type)
+        VALUES
+            (:run_label, :duration_seconds, :status, :error_message,
+             :rows_before, :rows_after, :row_delta, :change_type)
+    """)
+
+    with engine.begin() as connection:
+        connection.execute(insert_sql, {
+            "run_label": log_entry["run_label"],
+            "duration_seconds": log_entry["duration_seconds"],
+            "status": log_entry["status"],
+            "error_message": log_entry["error_message"],
+            "rows_before": log_entry["rows_before"],
+            "rows_after": log_entry["rows_after"],
+            "row_delta": log_entry["row_delta"],
+            "change_type": log_entry["change_type"],
+        })
+
+    print(f"✓ Also saved to Supabase pipeline_logs table")
+
+
 def run_with_logging(pipeline_fn, run_label: str = "manual_run"):
     """
     Wraps a pipeline function call, timing it and logging what changed.
@@ -126,6 +173,10 @@ def run_with_logging(pipeline_fn, run_label: str = "manual_run"):
     # Append to local log file (one JSON object per line)
     with open(LOG_FILE, "a") as f:
         f.write(json.dumps(log_entry) + "\n")
+
+    # Also save to Supabase, so the team can query pipeline history there
+    ensure_pipeline_logs_table()
+    save_log_to_supabase(log_entry)
 
     print(f"\nDuration     : {duration_seconds}s")
     print(f"Status       : {status}")
