@@ -1,6 +1,4 @@
-DROP TABLE IF EXISTS clean_sales;
-
-CREATE TABLE clean_sales (
+CREATE TABLE IF NOT EXISTS clean_sales (
     Store INTEGER,
     Dept INTEGER,
     Date DATE,
