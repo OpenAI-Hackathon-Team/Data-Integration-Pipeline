@@ -16,6 +16,8 @@ Author: Store Pulse Team
 
 import pandas as pd
 
+from etl.validation import validate_sources
+
 
 FEATURE_NUMERIC_COLUMNS = [
     "Temperature",
@@ -201,6 +203,15 @@ def transform_data(train_df, stores_df, features_df):
 
     # Handle missing values
     features_df = handle_missing_values(features_df)
+
+    # Enforce the rules in Config/schema.yaml before any source rows are
+    # merged or loaded.  This stops bad required keys, store metadata, and
+    # malformed values from reaching the analytics table.
+    validate_sources({
+        "train": train_df,
+        "stores": stores_df,
+        "features": features_df,
+    })
 
     # Merge datasets
     final_df = merge_datasets(

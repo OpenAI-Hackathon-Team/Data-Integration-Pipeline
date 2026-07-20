@@ -39,7 +39,7 @@ Store Pulse solves this problem by:
 - ✅ Merge multiple datasets
 - ✅ PostgreSQL integration
 - ✅ SQL-based analytics
-- 🔄 Dashboard visualization *(Coming Soon)*
+- ✅ Interactive Streamlit dashboard
 
 ---
 
@@ -140,7 +140,7 @@ The transformation stage performs:
 - Convert date formats
 - Handle missing values
 - Remove duplicates
-- Validate data quality
+- Validate required fields, types, unique store keys, allowed store types, and value ranges using `Config/schema.yaml`
 - Generate clean dataset
 
 ---
@@ -235,6 +235,30 @@ DB_PASSWORD=your_password
 python run_pipeline.py
 ```
 
+## Run Dashboard
+
+After the ETL has loaded `clean_sales`, activate the virtual environment and
+start the Streamlit dashboard:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+streamlit run app.py
+```
+
+Open the Local URL printed in the terminal, usually
+`http://localhost:8501`.
+
+The dashboard uses the same `DB_*` environment variables as the ETL and reads
+from the PostgreSQL `clean_sales` table. It includes:
+
+- Date, store, department, and holiday-week filters
+- Total sales, average weekly sales, active-store, and sales-record KPIs
+- A weekly sales trend
+- Top 10 stores and departments by total sales
+- A filtered data table with CSV download
+
+The dashboard's native dark theme is configured in `.streamlit/config.toml`.
+
 ---
 
 # 📈 Current Progress
@@ -244,15 +268,14 @@ python run_pipeline.py
 - ✅ Load Pipeline
 - ✅ PostgreSQL Integration
 - ✅ SQL Schema
-- 🚧 Dashboard Development
-- 🚧 Business KPIs
-- 🚧 Streamlit Web App
+- ✅ Dashboard Development
+- ✅ Business KPIs
+- ✅ Streamlit Web App
 
 ---
 
 # 🔮 Future Enhancements
 
-- Interactive Streamlit Dashboard
 - Sales Forecasting
 - Automated ETL Scheduling
 - Incremental Data Loading

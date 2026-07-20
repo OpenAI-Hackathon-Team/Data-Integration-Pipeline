@@ -1,15 +1,63 @@
-columns:
+datasets:
+  train:
+    columns:
+      Store:
+        type: integer
+        required: true
+      Dept:
+        type: integer
+        required: true
+      Date:
+        type: date
+        required: true
+      Weekly_Sales:
+        type: float
+        required: true
+      IsHoliday:
+        type: boolean
+        required: true
 
-  customer_id:
-    type: integer
-    required: true
-    unique: true
+  stores:
+    columns:
+      Store:
+        type: integer
+        required: true
+        unique: true
+      Type:
+        type: string
+        required: true
+        allowed_values: [A, B, C]
+      Size:
+        type: integer
+        required: true
+        min_value: 0
 
-  sales:
-    type: float
-    required: true
-    min_value: 0
-
-  order_date:
-    type: date
-    required: true
+  features:
+    columns:
+      Store:
+        type: integer
+        required: true
+      Date:
+        type: date
+        required: true
+      IsHoliday:
+        type: boolean
+        required: true
+      Temperature:
+        type: float
+      Fuel_Price:
+        type: float
+      MarkDown1:
+        type: float
+      MarkDown2:
+        type: float
+      MarkDown3:
+        type: float
+      MarkDown4:
+        type: float
+      MarkDown5:
+        type: float
+      CPI:
+        type: float
+      Unemployment:
+        type: float
