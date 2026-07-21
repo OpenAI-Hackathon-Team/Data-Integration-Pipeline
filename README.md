@@ -243,6 +243,10 @@ OPENAI_MODEL=gpt-5.6-terra
 python run_pipeline.py
 ```
 
+The pipeline compares the raw source files with the last successful run and
+skips the database load when nothing changed. To deliberately reload unchanged
+data, set `FORCE_FULL_REFRESH=true` in `.env` for that run.
+
 ## Run Dashboard
 
 After the ETL has loaded `clean_sales`, activate the virtual environment and

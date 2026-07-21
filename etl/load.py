@@ -156,6 +156,18 @@ def build_source_change_report(current: dict, previous: dict | None) -> list[dic
     return report
 
 
+def sources_unchanged(current: dict, previous: dict | None) -> bool:
+    """Return whether every input fingerprint matches the last successful run."""
+
+    return previous is not None and current == previous
+
+
+def force_full_refresh_requested() -> bool:
+    """Allow an explicit full reload even when source files are unchanged."""
+
+    return os.getenv("FORCE_FULL_REFRESH", "").strip().lower() in {"1", "true", "yes"}
+
+
 def source_snapshot_path(source_name: str) -> Path:
     """Return the one retained, compressed snapshot path for an input file."""
 
@@ -506,14 +518,8 @@ def verify_load():
 # ==========================================================
 
 def main():
-
-    # Step 1
-    test_connection()
-
-    # Step 2
-    execute_schema()
-
-    # Step 3
+    # Step 1: profile local source files before any database work. This makes
+    # no-change reruns fast and avoids replacing a table with identical data.
     train_df, stores_df, features_df = extract_data()
     source_data = {
         "train.csv": train_df,
@@ -521,15 +527,29 @@ def main():
         "features.csv": features_df,
     }
     source_profile = profile_sources(source_data)
+    previous_source_profile = load_previous_source_profile()
     source_change_report = build_source_change_report(
         source_profile,
-        load_previous_source_profile(),
+        previous_source_profile,
     )
+
+    if sources_unchanged(source_profile, previous_source_profile) and not force_full_refresh_requested():
+        print_source_change_report(source_change_report)
+        print("\nNo source changes detected. Skipping transformation and database load.")
+        print("Set FORCE_FULL_REFRESH=true to reload unchanged source data deliberately.")
+        return
+
     add_cell_change_details(
         source_change_report,
         source_data,
         load_previous_source_snapshots(source_data),
     )
+
+    # Step 2
+    test_connection()
+
+    # Step 3
+    execute_schema()
 
     # Step 4
     final_df = transform_data(
