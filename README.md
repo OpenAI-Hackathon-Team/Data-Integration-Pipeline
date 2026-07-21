@@ -294,17 +294,6 @@ The dashboard's fifth tab, Ask Store Pulse, calls GPT-5.6 (`gpt-5.6-terra`) thro
 
 ---
 
-# 🔮 Future Enhancements
-
-- Sales Forecasting
-- Automated ETL Scheduling
-- Incremental Data Loading
-- Docker Support
-- Cloud Deployment
-- CI/CD Pipeline
-
----
-
 # 👥 Team
 
 - **Maira Naveed**
