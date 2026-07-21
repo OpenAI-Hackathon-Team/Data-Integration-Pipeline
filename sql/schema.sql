@@ -22,18 +22,7 @@ CREATE TABLE IF NOT EXISTS clean_sales (
     Unemployment DOUBLE PRECISION
 );
 
--- `CREATE TABLE IF NOT EXISTS` does not add a column to tables created by an
--- older version of this schema. Migrate those tables without taking an
--- unnecessary table lock when the column already exists.
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1
-        FROM information_schema.columns
-        WHERE table_schema = current_schema()
-          AND table_name = 'clean_sales'
-          AND column_name = 'city'
-    ) THEN
-        ALTER TABLE clean_sales ADD COLUMN City TEXT;
-    END IF;
-END $$;
+-- `CREATE TABLE IF NOT EXISTS` does not add columns to a table created by an
+-- older version of this schema. PostgreSQL safely skips this migration when
+-- the column already exists.
+ALTER TABLE clean_sales ADD COLUMN IF NOT EXISTS City TEXT;
