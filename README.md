@@ -74,7 +74,10 @@ Store Pulse solves this problem by:
 ```
 store-pulse/
 │
-├── config/
+├── .streamlit/
+│   └── config.toml
+│
+├── Config/
 │   └── schema.yaml
 │
 ├── data/
@@ -82,25 +85,28 @@ store-pulse/
 │   │   ├── train.csv
 │   │   ├── stores.csv
 │   │   └── features.csv
-│   │
-│   └── processed/
-│       └── clean_sales.csv
 │
 ├── etl/
 │   ├── __init__.py
 │   ├── extract.py
 │   ├── transform.py
+│   ├── validation.py
 │   └── load.py
 │
 ├── sql/
-│   ├── schema.sql
-│   └── queries.sql
+│   └── schema.sql
 │
-├── run_pipeline.py
-├── requirements.txt
 ├── .env.example
 ├── .gitignore
-└── README.md
+├── ai_insights.py
+├── app.py
+├── LICENSE
+├── pipeline_logs.jsonl
+├── pipeline_logs.py
+├── README.md
+├── requirements.txt
+├── run_pipeline.py
+└── test_logging.py
 ```
 
 ---
@@ -225,6 +231,8 @@ DB_PORT=5432
 DB_NAME=postgres
 DB_USER=postgres
 DB_PASSWORD=your_password
+OPENAI_API_KEY=your_openai_api_key
+OPENAI_MODEL=gpt-5.6-terra
 ```
 
 ---
@@ -261,6 +269,18 @@ The dashboard's native dark theme is configured in `.streamlit/config.toml`.
 
 ---
 
+## How Codex and GPT-5.6 were used in building this project
+
+### Codex usage
+
+Codex was used throughout the project to scaffold the ETL workflow: extract, transform, validate, and load the Walmart sales data. It helped build the schema-driven validation system, pipeline logging, and the Streamlit dashboard, then iterate on the dashboard's Overview, Store Performance, Department Performance, and Trends & External Factors tabs. Codex also helped implement the Ask Store Pulse AI experience and diagnose issues encountered during development rather than only adding features. Those fixes included a blank-render issue caused by missing display calls, an `ImportError` caused by a stale cached module, and a Streamlit Markdown/LaTeX rendering problem in which multiple `$` characters in one string were interpreted as math delimiters. The development process involved inspecting the failing behavior, tracing it to the responsible code or cached state, applying a targeted fix, and re-running the dashboard or pipeline to verify it.
+
+### GPT-5.6 usage (Ask Store Pulse)
+
+The dashboard's fifth tab, Ask Store Pulse, calls GPT-5.6 (`gpt-5.6-terra`) through OpenAI's Responses API to produce an executive summary and answer follow-up questions about the currently filtered sales data. To control cost and latency, it sends the model a pre-aggregated JSON summary—totals, top stores, top departments, and holiday averages—rather than raw sales rows. The feature deliberately includes a `DEMO_MODE` fallback: if `OPENAI_API_KEY` is not set, it returns deterministic, data-grounded responses based on those same real aggregate values instead of making a live API call. The UI displays a visible “Demo mode” caption whenever this fallback is active, so demo output is never represented as live AI output. Adding a real `OPENAI_API_KEY` to `.env` switches the same functions to live GPT-5.6 calls with no code changes.
+
+---
+
 # 📈 Current Progress
 
 - ✅ Extract Pipeline
@@ -287,7 +307,9 @@ The dashboard's native dark theme is configured in `.streamlit/config.toml`.
 
 # 👥 Team
 
-**OpenAI Hackathon Team**
+- **Maira Naveed**
+- **Muhammad Burhan Ahmed**
+- **Khansa Ahmed**
 
 Project: **Store Pulse**
 
@@ -295,4 +317,4 @@ Project: **Store Pulse**
 
 # 📄 License
 
-This project is developed for the OpenAI Hackathon and is intended for educational and demonstration purposes.
+This project is licensed under the MIT License — see LICENSE for details.
