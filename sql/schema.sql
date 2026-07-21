@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS clean_sales (
 
     Type VARCHAR(5),
     Size INTEGER,
-    City TEXT,
 
     Temperature DOUBLE PRECISION,
     Fuel_Price DOUBLE PRECISION,
@@ -22,7 +21,6 @@ CREATE TABLE IF NOT EXISTS clean_sales (
     Unemployment DOUBLE PRECISION
 );
 
--- `CREATE TABLE IF NOT EXISTS` does not add columns to a table created by an
--- older version of this schema. PostgreSQL safely skips this migration when
--- the column already exists.
+-- Add this field after table creation so both new tables and tables created by
+-- older versions of the schema contain it exactly once.
 ALTER TABLE clean_sales ADD COLUMN IF NOT EXISTS City TEXT;

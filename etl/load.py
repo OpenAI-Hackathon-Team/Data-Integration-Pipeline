@@ -68,6 +68,7 @@ CORE_TABLE_COLUMNS = {
     "isholiday",
     "type",
     "size",
+    "city",
     "temperature",
     "fuel_price",
     "markdown1",
